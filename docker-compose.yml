@@ -3,7 +3,7 @@ version: "3"
 services:
   streamus:
     image: stream_us_node:1.0
-    command: npm start
+    command: bash -c "npm install && npm start"
     ports:
       - 3000:3000
     volumes:
