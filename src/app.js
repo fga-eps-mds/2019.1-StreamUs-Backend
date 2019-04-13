@@ -1,16 +1,18 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 
-var users = require('./routes/users');
+const users = require('./routes/users');
+const rooms = require('./routes/rooms')
 
-var app = express();
+const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser())
 
 app.use('/api/v1/users', users);
+app.use('/api/v1/room', rooms)
 
 module.exports = app;
