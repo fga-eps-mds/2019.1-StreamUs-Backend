@@ -26,4 +26,22 @@ var app = express();
 app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser());
-   
+
+
+   app.get('/login', function(req, res) {
+    //geração de string para cookie
+    var state = generateRandomString(16);
+    res.cookie(stateKey, state);
+  
+    // a aplicação requerendo autorização
+    var scope = 'user-read-private user-read-email';
+    res.redirect('https://accounts.spotify.com/authorize?' +
+      querystring.stringify({
+        response_type: 'code',
+        client_id: client_id,
+        scope: scope,
+        redirect_uri: redirect_uri,
+        state: state
+      }));
+  });
+    
