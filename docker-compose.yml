@@ -1,10 +1,21 @@
-version: "3"
+version: "3.4"
 
 services:
   streamus:
-    image: stream_us_node:1.0
+    build:
+      context: ./docker/
+      target: node
     command: bash -c "npm install && npm start"
     ports:
       - 3000:3000
     volumes:
       - $PWD/src:/var/app/StreamUs
+  arangodb:
+    build:
+      context: ./docker/
+      target: arangodb
+    ports:
+      - 8520:8529
+    environment:
+      - ARANGO_ROOT_PASSWORD=root123
+      - ARANGO_DATABASE=streamUs
