@@ -45,3 +45,65 @@ app.use(express.static(__dirname + '/public'))
       }));
   });
     
+  app.get('/callback', function(req, res) {
+
+    // a aplicação faz requisição para atualizar e para tokens de acesso
+    // depois da checagem do status da resposta
+  
+    var code = req.query.code || null;
+    var state = req.query.state || null;
+    var storedState = req.cookies ? req.cookies[stateKey] : null;
+  
+    if (state === null || state !== storedState) {
+      res.redirect('/#' +
+        querystring.stringify({
+          error: 'state_mismatch'
+        }));
+    } else {
+      res.clearCookie(stateKey);
+      var authOptions = {
+        url: 'https://accounts.spotify.com/api/token',
+        form: {
+          code: code,
+          redirect_uri: redirect_uri,
+          grant_type: 'authorization_code'
+        },
+        headers: {
+          'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+        },
+        json: true
+      };
+  
+      request.post(authOptions, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+  
+          var access_token = body.access_token,
+              refresh_token = body.refresh_token;
+              console.log(access_token)
+  
+          var options = {
+            url: 'https://api.spotify.com/v1/me',
+            headers: { 'Authorization': 'Bearer ' + access_token },
+            json: true
+          };
+  
+          //usa o token de acesso para acessar a API do Spotify
+          request.get(options, function(error, response, body) {
+            console.log(body);
+          });
+          //podemos também passar o token para o navegador para realizar requisições a partir dele
+          res.redirect('/#' +
+            querystring.stringify({
+              access_token: access_token,
+              refresh_token: refresh_token
+            }));
+        } else {
+          res.redirect('/#' +
+            querystring.stringify({
+              error: 'invalid_token'
+            }));
+        }
+      });
+    }
+  });
+  
