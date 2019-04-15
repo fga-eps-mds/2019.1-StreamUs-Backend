@@ -32,5 +32,17 @@ router.post('/', async (req, res) => {
     res.status(404)    
         
 })
+
+router.delete('/delete/:user_key/:room_key', async (req, res) => {
+    const {room_key, user_key} = req.params
+    const {_id: userId} = await graph.vertexCollection("User").document(user_key)
+    const {_id: roomId} = await graph.vertexCollection("Room").document(room_key)
+    if(userId && roomId) {
+      const deleteRoom = await graph.vertexCollection("Room").remove(roomId)
+      res.status(200).json({Removed: deleteRoom})
+    }
+    res.status(404).json({ERR: "Error"})
+  });
+
 module.exports = router
 
