@@ -3,7 +3,7 @@ version: "3.4"
 services:
   streamus:
     build:
-      context: ./docker/
+      dockerfile: .
       target: node
     command: bash -c "npm install && npm start"
     ports:
@@ -12,7 +12,7 @@ services:
       - $PWD/src:/var/app/StreamUs
   arangodb:
     build:
-      context: ./docker/
+      dockerfile: .
       target: arangodb
     ports:
       - 8520:8529

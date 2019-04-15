@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "check-sintax": "eslint app.js routes/**"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
