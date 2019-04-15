@@ -14,48 +14,47 @@ const objectRequestPost = Joi.object().keys({
   description: Joi.string()
 })
 
+let spotifyApi = new SpotifyWebApi({
+  clientId: '',
+  clientSecret: '',
+  redirectUri: ''
+});
 
 let accessToken = '';
-let userId;
-let name;
-let description;
-// spotifyApi.setAccessToken(accessToken);
-
-// spotifyApi.getMe()
-//       .then(function(data) {
-//         userId = data.body.id
-//       }, function(err) {
-//         console.log('Something went wrong! - getMe', err);
-// });
-
-let playlists = {};
+spotifyApi.setAccessToken(accessToken);
 
 //Retorna um JSON com as playlists colaborativas do usuário
-router.get('/', function(req, res, next) {
-    spotifyApi.getUserPlaylists(userId)
-  .then(function(data) {
-    playlists = data.body.items
+router.get('/user/:user_key/playlists', async (req, res, next) => {
+    const {user_key} = req.params
+    const {userSpotifyId} = await graph.vertexCollection("User").document(user_key)
+    spotifyApi.getUserPlaylists(userSpotifyId).then( data => {
+    let playlists = data.body.items
     playlists.toString()
-    var filtered = playlists.filter(function (i,n){
+    let collabPlaylists = playlists.filter((i,n) => {
         if(i.collaborative == true){
             return true;
         }
         return false;
     });
-    res.json(filtered)
+    res.status(200).json(collabPlaylists)
   },function(err) {
-    console.log('Something went wrong!', err);
+    res.status(404).json(err)
   });
 });
 
 //Seleciona uma playlist colaborativa
-// router.post('/', function(req, res) {
-//    var id = req.param.id;
-// });
-
-router.get('/post', function(req, res, next) {
-    request.post('http://localhost:3000/api/v1/playlists/post', {form:{userId, name:'New Playlist', description:'New Playlist´s description'}})
-    res.redirect('/')
+router.post('/user/:user_key/room/:room_key/playlist/:playlist_id', async (req, res) => {
+    const {room_key, user_key, playlist_id} = req.params
+    spotifyApi.getPlaylist(playlist_id).then( async data => {
+        const {href: url, name, description} = data.body
+        const savePlaylist = await graph.vertexCollection("Playlist").save({url, name, description})
+        await graph.edgeCollection("users_playlist").save({type: "owner"},
+        userId, savePlaylist._id)
+        await graph.edgeCollection("room_playlist").save({}, room_key, savePlaylist._id)
+        res.status(200).json(savePlaylist)
+    }, function(err) {
+        res.status(404).json(err)
+    });
 });
 
 //Cria uma playlist colaborativa com um nome(obrigatório) e descrição(opcional)
@@ -72,12 +71,12 @@ router.post('/user/:user_key/room/:room_key/playlists', async (req, res) => {
   if(userSpotifyId) {
     spotifyApi.createPlaylist(userSpotifyId, name, { 'public' : false, 'collaborative' : true, 'description' : description })
       .then(async data => {
-        const {href: url, name, description} = data
+        const {href: url, name, description} = data.body
         const savePlaylist = await graph.vertexCollection("Playlist").save({url, name, description})
         await graph.edgeCollection("users_playlist").save({type: "owner"},
         userId, savePlaylist._id)
         await graph.edgeCollection("room_playlist").save({}, room_key, savePlaylist._id)
-        res.status(200).json(savePlaylist)
+        res.status(201).json(savePlaylist)        
       }, err => {
         res.status(404).json(err)
     });
