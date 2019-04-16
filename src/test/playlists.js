@@ -45,7 +45,7 @@ describe("Testing /routes/playlists", async function() {
         done();
     });
 
-    it("POST - set collaborative playlist in a room ", function(done) {
+    it("POST - set collaborative playlist in a room", function(done) {
         request.post(
             {
                 url : urlBase + "/9115/room/9178/playlist/6Psi2To1yK56okWDCU6Fh6",
@@ -61,6 +61,27 @@ describe("Testing /routes/playlists", async function() {
                 expect(response.statusCode).to.equal(200);
 
                 expect(_body._key);
+            }
+        );
+        done();
+    });    
+
+    it("DELETE - delete collaborative playlist in a room", function(done) {
+        request.delete(
+            {
+                url : urlBase + "/9115/room/9178/playlist/146119",
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(200);
+
+                expect(_body.Removed);
             }
         );
         done();
