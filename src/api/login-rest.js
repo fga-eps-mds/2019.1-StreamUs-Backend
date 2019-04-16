@@ -4,13 +4,14 @@ const cors = require('cors');
 const querystring = require('querystring');
 const cookieParser = require('cookie-parser');
 
-var client_id = 'be628abe9b224f61b5777fb3d0d6a636'; 
-var client_secret = 'df77974aade94da8a62a76af55ad9825'; 
+var client_id = 'id'; 
+var client_secret = 'secret'; 
 var redirect_uri = 'http://localhost:8888/callback/'; 
 
 const PORT = 8888;
 
 var generateRandomString = function(length) {
+
     var text = '';
     var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   
