@@ -21,30 +21,49 @@ describe("Testing /routes/playlists", async function() {
     // });
 
     it("GET - user collaborative playlists", function(done) {
-    request.get(
-        {
-            url : urlBase + "/" + 9115 + "/playlists",
-        }, function(error, response, body) {
-            let _body = {};
-            try{
-                _body = JSON.parse(body);
+        request.get(
+            {
+                url : urlBase + "/9115/playlists",
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(200);
+
+                _body.forEach(function(element) {
+                    if(element.should.have.property('collaborative')){
+                        expect(element.collaborative).to.equal(true);
+                    }                   
+                });
             }
-            catch(e){
-                _body = {};
+        );
+        done();
+    });
+
+    it("POST - set collaborative playlist in a room ", function(done) {
+        request.post(
+            {
+                url : urlBase + "/9115/room/9178/playlist/6Psi2To1yK56okWDCU6Fh6",
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(200);
+
+                expect(_body._key);
             }
-
-            expect(response.statusCode).to.equal(200);
-
-            _body.forEach(function(element) {
-                if(element.should.have.property('collaborative')){
-                    expect(element.collaborative).to.equal(true);
-                }                   
-            });
-        }
-    );
-    done();
-});
-
-    
+        );
+        done();
+    });    
 
 });
