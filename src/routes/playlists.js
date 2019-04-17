@@ -15,12 +15,12 @@ const objectRequestPost = Joi.object().keys({
 })
 
 let spotifyApi = new SpotifyWebApi({
-  clientId: 'b18ddb0dc6224de5b46fab81d1a3b4b1',
-  clientSecret: '48a0faabc20b47ffac34d84dd0eaa1c5',
-  redirectUri: 'http://localhost:3000/api/v1/playlists/callbacks'
+  clientId: '',
+  clientSecret: '',
+  redirectUri: ''
 });
 
-let accessToken = 'BQAfsqUnfSJW4TOAXi8uUtitr82kI1ZAol-Dfj8c3XbpweFjJsi5gdN3j5XfvZ_Jd1jGfMvqpfKceFnwcBlOATO3YbMrcD6KNWIPng_Tz6NO6mTbBy7A0PdVej4l46vTVMseMXgfifCDtvSKsIRzz6Va6-H_LbRXvjr-2oxtOUlO5JuX_-s9RzmTKdNkbeVO7gbx-K8PRCXCBqU77ro7rSWTSBYxfq58kOK2pkN2l1iORNuK_XbavCZsJg';
+let accessToken = '';
 spotifyApi.setAccessToken(accessToken);
 
 //Retorna um JSON com as playlists colaborativas do usuário
@@ -61,7 +61,7 @@ router.post('/user/:user_key/room/:room_key/playlist/:playlist_id', async (req, 
 router.post('/user/:user_key/room/:room_key/playlists', async (req, res) => {
   Joi.validate(req.body, objectRequestPost, (err, value) => {
     if(err) {
-      res.json(err)
+      res.status(400).json(err)
       throw err
     }
   })

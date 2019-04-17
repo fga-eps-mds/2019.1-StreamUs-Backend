@@ -20,7 +20,7 @@ describe("Testing /routes/playlists", function() {
     //         }
     // });
 
-    it("GET - get user collaborative playlists", function(done) {
+    it("GET - get user collaborative playlists - OK", function(done) {
         request.get(
             {
                 url : urlBase + "/9115/playlists",
@@ -45,7 +45,26 @@ describe("Testing /routes/playlists", function() {
         done();
     });
 
-    it("POST - create collaborative playlist in a room", function(done) {
+    it("GET - get user collaborative playlists - FAIL", function(done) {
+        request.get(
+            {
+                url : urlBase + "/9115X/playlists",
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(404);
+            }
+        );
+        done();
+    });
+
+    it("POST - create collaborative playlist in a room - OK", function(done) {
         request.post(
             {
                 url : urlBase + "/9115/room/9178/playlists",
@@ -66,7 +85,47 @@ describe("Testing /routes/playlists", function() {
         done();
     });
 
-    it("POST - set collaborative playlist in a room", function(done) {
+    it("POST - create collaborative playlist in a room - FAIL", function(done) {
+        request.post(
+            {
+                url : urlBase + "/9115X/room/9178/playlists",
+                form:{userId:'User/21ghq47jneekpkayuvhq46ahq', name:'New Playlist', description:'New description.'}
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(404);
+            }
+        );
+        done();
+    });
+
+    it("POST - create collaborative playlist in a room - FAIL", function(done) {
+        request.post(
+            {
+                url : urlBase + "/9115/room/9178/playlists",
+                form:{userId:'User21ghq47jneekpkayuvhq46ahq', name:'New Playlist', description:'New description.'}
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(400);
+            }
+        );
+        done();
+    });
+
+    it("POST - set collaborative playlist in a room - OK", function(done) {
         request.post(
             {
                 url : urlBase + "/9115/room/9178/playlist/6Psi2To1yK56okWDCU6Fh6",
@@ -86,10 +145,29 @@ describe("Testing /routes/playlists", function() {
         done();
     });    
 
-    it("DELETE - delete collaborative playlist in a room", function(done) {
+    it("POST - set collaborative playlist in a room - FAIL", function(done) {
+        request.post(
+            {
+                url : urlBase + "/9115/room/9178/playlist/",
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(404);
+            }
+        );
+        done();
+    }); 
+
+    it("DELETE - delete collaborative playlist in a room - OK", function(done) {
         request.delete(
             {
-                url : urlBase + "/9115/room/9178/playlist/146119",
+                url : urlBase + "/9115/room/9178/playlist/144730",
             }, function(error, response, body) {
                 let _body = {};
                 try{
@@ -105,6 +183,27 @@ describe("Testing /routes/playlists", function() {
             }
         );
         done();
-    });    
+    });
+    
+    it("DELETE - delete collaborative playlist in a room - FAIL", function(done) {
+        request.delete(
+            {
+                url : urlBase + "/9115X/room/9178X/playlist/146119X",
+            }, function(error, response, body) {
+                let _body = {};
+                try{
+                    _body = JSON.parse(body);
+                }
+                catch(e){
+                    _body = {};
+                }
+
+                expect(response.statusCode).to.equal(404);
+
+                expect(_body.Removed);
+            }
+        );
+        done();
+    });
 
 });
