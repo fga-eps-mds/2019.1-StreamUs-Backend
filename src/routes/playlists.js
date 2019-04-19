@@ -15,12 +15,12 @@ const objectRequestPost = Joi.object().keys({
 })
 
 let spotifyApi = new SpotifyWebApi({
-  clientId: '',
-  clientSecret: '',
-  redirectUri: ''
+  clientId: process.env.CLIENT_ID || '',
+  clientSecret: process.env.CLIENT_SECRET || '',
+  redirectUri: process.env.HOST_API || '' + '/playlists/callback'
 });
 
-let accessToken = '';
+let accessToken = process.env.ACCESS_TOKEN || '';
 spotifyApi.setAccessToken(accessToken);
 
 //Retorna um JSON com as playlists colaborativas do usuário
@@ -48,9 +48,9 @@ router.post('/user/:user_key/room/:room_key/playlist/:playlist_id', async (req, 
     spotifyApi.getPlaylist(playlist_id).then( async data => {
         const {href: url, name, description} = data.body
         const savePlaylist = await graph.vertexCollection("Playlist").save({url, name, description})
-        //await graph.edgeCollection("users_playlist").save({type: "owner"},
-        //userId, savePlaylist._id)
-        //await graph.edgeCollection("room_playlist").save({}, room_key, savePlaylist._id)
+        await graph.edgeCollection("users_playlist").save({type: "owner"},
+        userId, savePlaylist._id)
+        await graph.edgeCollection("room_playlist").save({}, room_key, savePlaylist._id)
         res.status(200).json(savePlaylist)
     }, function(err) {
         res.status(404).json(err)
