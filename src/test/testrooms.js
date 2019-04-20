@@ -10,7 +10,7 @@ db.useDatabase(process.env.ARANGO_DATABASE);
 const graph = db.graph('streamUs');
 const urlBase = 'http://localhost:3000/api/v1/room';
 
-let userId;
+
 describe('Testing /routes/rooms', () => {
   
   it('POST - create ROOM - OK', (done) => {
@@ -85,6 +85,65 @@ describe('Testing /routes/rooms', () => {
         }
 
         expect(response.statusCode).to.equal(404);
+      },
+    );
+    done();
+  });
+
+  it('DELETE - delete ROOM - OK', (done) => {
+    request.delete(
+      {
+        url: `${urlBase}/delete/2463/27796`,
+      }, (error, response, body) => {
+        let _body = {};
+        try {
+          _body = JSON.parse(body);
+        } catch (e) {
+          _body = {};
+        }
+        expect(response.statusCode).to.equal(200);
+
+        expect(_body.Removed);
+      },
+    );
+    done();
+  });
+
+  it('DELETE - delete ROOM without /:user_key - FAIL', (done) => {
+    request.delete(
+      {
+        url: `${urlBase}/delete/2463/25828X`,
+      }, (error, response, body) => {
+        let _body = {};
+        try {
+          _body = JSON.parse(body);
+        } catch (e) {
+          _body = {};
+        }
+
+        expect(response.statusCode).to.equal(404);
+
+        expect(_body.Removed);
+      },
+    );
+    done();
+  });
+
+  it('DELETE - delete ROOM without /:room_key - FAIL', (done) => {
+    request.delete(
+      {
+        url: `${urlBase}/delete/2463X/27043`,
+      }, (error, response, body) => {
+        let _body = {};
+        try {
+          _body = JSON.parse(body);
+        } catch (e) {
+          _body = {};
+        }
+
+        expect(response.statusCode).to.equal(404);
+
+        expect(_body.Removed);
       },
     );
     done();
