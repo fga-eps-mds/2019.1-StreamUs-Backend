@@ -7,12 +7,9 @@ const { expect } = chai;
 const db = new Database({ url: process.env.ARANGO_HOST });
 db.useBasicAuth('root', process.env.ARANGO_ROOT_PASSWORD);
 db.useDatabase(process.env.ARANGO_DATABASE);
-const graph = db.graph('streamUs');
 const urlBase = 'http://localhost:3000/api/v1/room';
 
-
-describe('Testing /routes/rooms', () => {
-  
+describe('Testing /routes/rooms', () => {  
   it('POST - create ROOM - OK', (done) => {
     request.post(
       {
