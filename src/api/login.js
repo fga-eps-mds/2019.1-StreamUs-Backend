@@ -9,6 +9,7 @@ var client_secret = 'secret';
 var redirect_uri = 'http://localhost:8888/callback/'; 
 
 const PORT = 8888;
+let DADOS;
 
 var generateRandomString = function(length) {
 
@@ -81,7 +82,7 @@ app.use(express.static(__dirname + '/public'))
   
           var access_token = body.access_token,
               refresh_token = body.refresh_token;
-              console.log(access_token)
+            //   console.log(access_token)
   
           var options = {
             url: 'https://api.spotify.com/v1/me',
@@ -90,15 +91,18 @@ app.use(express.static(__dirname + '/public'))
           };
   
           //usa o token de acesso para acessar a API do Spotify
-          request.get(options, function(error, response, body) {
-            console.log(body);
+          request.get(options, async  function(error, response, body) {
+            DADOS = await body; //guarda o json com os dados do usuário
+            //console.log(DADOS);
           });
+        res.redirect('/json');
+
           //podemos também passar o token para o navegador para realizar requisições a partir dele
-          res.redirect('/#' +
-            querystring.stringify({
-              access_token: access_token,
-              refresh_token: refresh_token
-            }));
+        //   res.redirect('/#' +
+        //     querystring.stringify({
+        //       access_token: access_token,
+        //       refresh_token: refresh_token
+        //     }));
         } else {
           res.redirect('/#' +
             querystring.stringify({
@@ -136,6 +140,11 @@ app.use(express.static(__dirname + '/public'))
     });
   });
 
+  app.get('/json', (req, res, ) => {
+    //console.log(DADOS)
+    //envia um json como resposta
+    res.json(DADOS)
+  })
 console.log(`ativa em localhost:${PORT}`);
 
 app.listen(PORT);
