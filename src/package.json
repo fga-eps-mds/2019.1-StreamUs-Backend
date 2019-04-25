@@ -1,10 +1,11 @@
 {
-  "name": "StreamUs",
+  "name": "stream-us",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "check-sintax": "eslint app.js routes/**"
+    "check-syntax": "eslint app.js routes/**",
+    "test": "mocha"
   },
   "dependencies": {
     "arangojs": "6.10.0",
