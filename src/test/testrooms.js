@@ -1,3 +1,4 @@
+/* eslint-disable */
 const Database = require('arangojs');
 const should = require('should');
 const request = require('request');

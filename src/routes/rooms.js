@@ -15,6 +15,7 @@ const objectValidate = Joi.object().keys({
   permissions: Joi.string().required(),
 });
 
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
 router.post('/', async (req, res) => {
   Joi.validate(req.body, objectValidate, (err) => {
     if (err) {
