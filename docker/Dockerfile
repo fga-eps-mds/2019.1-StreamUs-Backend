@@ -1,6 +1,6 @@
 FROM arangodb/arangodb:3.3.22 AS arangodb
 MAINTAINER Ygor Galeno <ygor.tgaleno@gmail.com>
-COPY ./entrypoints/setup.js /docker-entrypoint-initdb.d 
+COPY ./docker/scripts/setup.js /docker-entrypoint-initdb.d 
 
 FROM node:8-jessie AS node
 MAINTAINER Ygor Galeno <ygor.tgaleno@gmail.com>

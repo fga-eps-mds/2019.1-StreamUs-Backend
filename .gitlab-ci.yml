@@ -1,0 +1,18 @@
+image: docker:git
+
+services:
+- docker:dind
+
+variables:
+  CONTAINER_IMAGE: registry.gitlab.com/streamus
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+stages:
+  - build and check-syntax
+
+build image check syntax:
+  stage:  build and check-syntax
+  script:
+   - docker build --target node -t node/$CONTAINER_IMAGE:$CI_COMMIT_SHA .
+   - docker run node/$CONTAINER_IMAGE:$CI_COMMIT_SHA npm run check-syntax
