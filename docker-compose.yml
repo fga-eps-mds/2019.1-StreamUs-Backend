@@ -9,29 +9,46 @@ services:
     command: bash -c "npm install && npm start"
     environment: 
       - ARANGO_HOST=http://arangodb:8529
-      - ARANGO_ROOT_PASSWORD=root123
-      - ARANGO_DATABASE=streamUs
-    links:
-      - arangodb
-    environment:
-      - ARANGO_HOST=http://arangodb:8529
-      - ARANGO_DATABASE=streamUs
-      - ARANGO_ROOT_PASSWORD=root123
-    ports:
-      - 3000:3000
+      - ARANGO_ROOT_PASSWORD=''
+      - ARANGO_DATABASE=''
+      - REDIS_HOST=redis
+      - CLIENT_ID=''
+      - CLIENT_SECRET=''
+      - CLIENT_URI=''
     volumes:
       - $PWD/src:/var/app/StreamUs
-      
     links:
       - arangodb
-
+      - redis
+  redis:
+    image: redis:5-stretch
+    volumes:
+      - ./data-redis/redis:/data
+    entrypoint: redis-server --appendonly yes
+    restart: always
   arangodb:
     build:
       context: .
       dockerfile: ./docker/Dockerfile
       target: arangodb
-    ports:
-      - 8520:8529
     environment:
-      - ARANGO_ROOT_PASSWORD=root123
+      - ARANGO_ROOT_PASSWORD=''
       - ARANGO_DATABASE=streamUs
+  nginx:
+    image: nginx:1.15-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - streamus
+    volumes:
+      - ./data-encrypt/nginx:/etc/nginx/conf.d
+      - ./data-encrypt/certbot/conf:/etc/letsencrypt
+      - ./data-encrypt/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data-encrypt/certbot/conf:/etc/letsencrypt
+      - ./data-encrypt/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"

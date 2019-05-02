@@ -2,11 +2,10 @@ const express = require('express');
 const request = require('request');
 const querystring = require('querystring');
 
-const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const redirectUri = process.env.REDIRECT_URI;
+const clientId = process.env.CLIENT_ID || '';
+const clientSecret = process.env.CLIENT_SECRET || '';
+const redirectUri = process.env.CLIENT_URI || 'http://localhost:3000/authorization';
 const router = express.Router();
-
 
 const generateRandomString = (length) => {
   let text = '';
@@ -20,6 +19,7 @@ const generateRandomString = (length) => {
 
 const stateKey = 'spotify_auth_state';
 
+/* eslint no-shadow: ["error", { "allow": ["response"] }] */
 
 router.get('/login', (req, res) => {
   // geração de string para cookie
@@ -28,29 +28,26 @@ router.get('/login', (req, res) => {
 
   // a aplicação requerendo autorização
   const scope = 'user-read-private user-read-email';
-  res.redirect(`https://accounts.spotify.com/authorize?${
-    querystring.stringify({
+  res.redirect(
+    `https://accounts.spotify.com/authorize?${querystring.stringify({
       response_type: 'code',
       client_id: clientId,
       scope,
       redirect_uri: redirectUri,
       state,
-    })}`);
+    })}`,
+  );
 });
 
-router.get('/callback', (req, res) => {
+router.get('/authorization', (req, res) => {
   // a aplicação faz requisição para atualizar e para tokens de acesso
   // depois da checagem do status da resposta
 
   const code = req.query.code || null;
   const state = req.query.state || null;
   const storedState = req.cookies ? req.cookies[stateKey] : null;
-
   if (state === null || state !== storedState) {
-    res.redirect(`/#${
-      querystring.stringify({
-        error: 'state_mismatch',
-      })}`);
+    res.json({ error: 'state_mismatch' });
   } else {
     res.clearCookie(stateKey);
     const authOptions = {
@@ -69,56 +66,30 @@ router.get('/callback', (req, res) => {
     request.post(authOptions, (error, response, body) => {
       if (!error && response.statusCode === 200) {
         const { access_token: accessToken } = body;
-        const { refresh_token: refreshToken } = body;
-        //   console.log(access_token)
 
         const options = {
           url: 'https://api.spotify.com/v1/me',
           headers: { Authorization: `Bearer ${accessToken}` },
           json: true,
         };
-
         // usa o token de acesso para acessar a API do Spotify
-        request.get(options);
+        request.get(options, async (err, response, bodyUser) => {
+          if (err) {
+            const responseErr = err;
+            responseErr.logged = false;
+            res.json(responseErr);
+          }
+
+          req.session.uri = await bodyUser.uri.replace(/[a-z]+:[a-z]+:/gm, '');
+          req.session.logged = true;
+          res.json({ uri: req.session.uri });
+        });
         // podemos também passar o token para o navegador para realizar requisições a partir dele
-        res.redirect(`/#${
-          querystring.stringify({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })}`);
       } else {
-        res.redirect(`/#${
-          querystring.stringify({
-            error: 'invalid_token',
-          })}`);
+        res.json({ error: 'Invalid Token' });
       }
     });
   }
-});
-
-
-router.get('/refresh_token', (req, res) => {
-  // requisição de acesso pelo novo token
-
-  const { refresh_token: refreshToken } = req.query;
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    headers: { Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}` },
-    form: {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    },
-    json: true,
-  };
-
-  request.post(authOptions, (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      const { access_token: accessToken } = body;
-      res.send({
-        access_token: accessToken,
-      });
-    }
-  });
 });
 
 module.exports = router;

@@ -10,7 +10,9 @@ db.useBasicAuth('root', process.env.ARANGO_ROOT_PASSWORD);
 db.useDatabase(process.env.ARANGO_DATABASE);
 const graph = db.graph('streamUs');
 const objectRequestPost = Joi.object().keys({
-  userId: Joi.string().regex(/User\/[0-9a-z]+$/).required(),
+  userId: Joi.string()
+    .regex(/User\/[0-9a-z]+$/)
+    .required(),
   name: Joi.string().required(),
   description: Joi.string(),
 });
@@ -29,35 +31,44 @@ spotifyApi.setAccessToken(accessToken);
 router.get('/user/:userKey/playlists', async (req, res) => {
   const { userKey } = req.params;
   const { userSpotifyId } = await graph.vertexCollection('User').document(userKey);
-  spotifyApi.getUserPlaylists(userSpotifyId).then((data) => {
-    const playlists = data.body.items;
-    playlists.toString();
-    const collabPlaylists = playlists.filter((i) => {
-      if (i.collaborative === true) {
-        return true;
-      }
-      return false;
-    });
-    res.status(200).json(collabPlaylists);
-  }, (err) => {
-    res.status(404).json(err);
-  });
+  spotifyApi.getUserPlaylists(userSpotifyId).then(
+    (data) => {
+      const playlists = data.body.items;
+      playlists.toString();
+      const collabPlaylists = playlists.filter((i) => {
+        if (i.collaborative === true) {
+          return true;
+        }
+        return false;
+      });
+      res.status(200).json(collabPlaylists);
+    },
+    (err) => {
+      res.status(404).json(err);
+    },
+  );
 });
 
 // Seleciona uma playlist colaborativa
 router.post('/user/:userKey/room/:roomKey/playlist/:playlistId', async (req, res) => {
   const { roomKey, userKey, playlistId } = req.params;
   const userId = graph.vertexCollection('User').document({ _key: userKey });
-  spotifyApi.getPlaylist(playlistId).then(async (data) => {
-    const { href: url, name, description } = data.body;
-    const savePlaylist = await graph.vertexCollection('Playlist').save({ url, name, description });
-    await graph.edgeCollection('users_playlist').save({ type: 'owner' },
-      userId, savePlaylist._id);
-    await graph.edgeCollection('room_playlist').save({}, roomKey, savePlaylist._id);
-    res.status(200).json(savePlaylist);
-  }, (err) => {
-    res.status(404).json(err);
-  });
+  spotifyApi.getPlaylist(playlistId).then(
+    async (data) => {
+      const { href: url, name, description } = data.body;
+      const savePlaylist = await graph
+        .vertexCollection('Playlist')
+        .save({ url, name, description });
+      await graph
+        .edgeCollection('users_playlist')
+        .save({ type: 'owner' }, userId, savePlaylist._id);
+      await graph.edgeCollection('room_playlist').save({}, roomKey, savePlaylist._id);
+      res.status(200).json(savePlaylist);
+    },
+    (err) => {
+      res.status(404).json(err);
+    },
+  );
 });
 
 // Cria uma playlist colaborativa com um nome(obrigatório) e descrição(opcional)
@@ -72,17 +83,24 @@ router.post('/user/:userKey/room/:roomKey/playlists', async (req, res) => {
   const { userId, name, description } = req.body;
   const { userSpotifyId } = await graph.vertexCollection('User').document(userKey);
   if (userSpotifyId) {
-    spotifyApi.createPlaylist(userSpotifyId, name,
-      { public: false, collaborative: true, description })
-      .then(async (data) => {
-        const { href: url, name: nameSpotify, description: descriptionSpotify } = data.body;
-        const savePlaylist = await graph.vertexCollection('Playlist').save({ url, nameSpotify, descriptionSpotify });
-        await graph.edgeCollection('users_playlist').save({ type: 'owner' }, userId, savePlaylist._id);
-        await graph.edgeCollection('room_playlist').save({}, roomKey, savePlaylist._id);
-        res.status(201).json(savePlaylist);
-      }, (err) => {
-        res.status(404).json(err);
-      });
+    spotifyApi
+      .createPlaylist(userSpotifyId, name, { public: false, collaborative: true, description })
+      .then(
+        async (data) => {
+          const { href: url, name: nameSpotify, description: descriptionSpotify } = data.body;
+          const savePlaylist = await graph
+            .vertexCollection('Playlist')
+            .save({ url, nameSpotify, descriptionSpotify });
+          await graph
+            .edgeCollection('users_playlist')
+            .save({ type: 'owner' }, userId, savePlaylist._id);
+          await graph.edgeCollection('room_playlist').save({}, roomKey, savePlaylist._id);
+          res.status(201).json(savePlaylist);
+        },
+        (err) => {
+          res.status(404).json(err);
+        },
+      );
   }
 });
 
@@ -98,6 +116,5 @@ router.delete('/user/:userKey/room/:roomKey/playlist/:playlistKey', async (req, 
   }
   res.status(404).json({ ERR: 'Error' });
 });
-
 
 module.exports = router;
