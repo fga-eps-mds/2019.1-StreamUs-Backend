@@ -21,12 +21,8 @@ const spotifyApi = new SpotifyWebApi({
   redirectUri: `${process.env.HOST_API || ''}/playlists/callback`, //verificar isso
 });
 
-spotifyApi
-  .authorizationCodeGrant(authorizationCode)
-  .then(function (data) {
-
-    spotifyApi.setAccessToken(data['access_token'])
-  })
+const accessToken = process.env.ACCESS_TOKEN || '';
+spotifyApi.setAccessToken(accessToken);
 
 
 router.put('/playlists/:playlistId', async (req, res) => {
