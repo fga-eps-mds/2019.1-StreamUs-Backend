@@ -9,6 +9,7 @@ const redis = require('redis');
 const rooms = require('./routes/rooms');
 const playlists = require('./routes/playlists');
 const login = require('./routes/login');
+const musicPriority = require('./routes/musicPriority');
 
 const redisClient = redis.createClient({ host: process.env.REDIS_HOST || 'localhost', port: 6379 });
 const app = express();
@@ -37,5 +38,6 @@ app.use(cors()).use(cookieParser());
 app.use(login);
 app.use(rooms);
 app.use(playlists);
+app.use(musicPriority);
 
 module.exports = app;
