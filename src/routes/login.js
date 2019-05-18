@@ -39,6 +39,13 @@ router.get('/login', (req, res) => {
   );
 });
 
+router.get('/spotify-credentials', (req, res) => {
+  const credentials = {
+    clientId, clientSecret, redirectUri,
+  };
+  res.json(credentials);
+});
+
 router.get('/authorization', (req, res) => {
   // a aplicação faz requisição para atualizar e para tokens de acesso
   // depois da checagem do status da resposta
