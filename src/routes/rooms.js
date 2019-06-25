@@ -34,6 +34,21 @@ router.post('/', async (req, res) => {
   res.status(404);
 });
 
+router.post('/adduser/:userKey/:roomKey/:newUserKey', async (req, res) => {
+  const { userKey, roomKey, newUserKey } = req.params;
+  const user = await db.collection('User').document(userKey);
+  const newUser = await db.collection('User').document(newUserKey);
+  const room = await db.collection('Room').document(roomKey);
+  if (user && newUser && room) {
+    const userOwner = await db.collection('users_room').document(user._id, room._id);
+    if (userOwner.type === 'owner') {
+      await graph.edgeCollection('users_room').save({ type: 'default' }, newUser._id, room._id);
+      res.status(200);
+    }
+  }
+  res.status(404);
+});
+
 router.delete('/delete/:user_key/:room_key', async (req, res) => {
   const { roomKey, userKey } = req.params;
   const { _id: userId } = await graph.vertexCollection('User').document(userKey);
