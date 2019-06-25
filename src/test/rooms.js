@@ -23,7 +23,6 @@ describe('Testing /routes/rooms', () => {
         } catch (e) {
           _body = {};
         }
-
         expect(response.statusCode).to.equal(201);
         expect(_body._key);
       },
@@ -43,7 +42,6 @@ describe('Testing /routes/rooms', () => {
         } catch (e) {
           _body = {};
         }
-
         expect(response.statusCode).to.equal(404);
       },
     );
@@ -62,7 +60,6 @@ describe('Testing /routes/rooms', () => {
         } catch (e) {
           _body = {};
         }
-
         expect(response.statusCode).to.equal(404);
       },
     );
@@ -81,7 +78,6 @@ describe('Testing /routes/rooms', () => {
         } catch (e) {
           _body = {};
         }
-
         expect(response.statusCode).to.equal(404);
       },
     );
@@ -100,7 +96,6 @@ describe('Testing /routes/rooms', () => {
           _body = {};
         }
         expect(response.statusCode).to.equal(200);
-
         expect(_body.Removed);
       },
     );
@@ -118,9 +113,7 @@ describe('Testing /routes/rooms', () => {
         } catch (e) {
           _body = {};
         }
-
         expect(response.statusCode).to.equal(404);
-
         expect(_body.Removed);
       },
     );
@@ -138,10 +131,42 @@ describe('Testing /routes/rooms', () => {
         } catch (e) {
           _body = {};
         }
-
         expect(response.statusCode).to.equal(404);
-
         expect(_body.Removed);
+      },
+    );
+    done();
+  });
+    
+  it('POST - add default user in a room - OK', (done) => {
+    request.post(
+      {
+        url: `${urlBase}/adduser/27043/2463/27044`,
+      }, (error, response, body) => {
+        let _body = {};
+        try {
+          _body = JSON.parse(body);
+        } catch (e) {
+          _body = {};
+        }
+        expect(response.statusCode).to.equal(200);
+      },
+    );
+    done();
+  });
+
+  it('POST - add default user in a room - FAIL', (done) => {
+    request.post(
+      {
+        url: `${urlBase}/adduser/27043/2463/27044X`,
+      }, (error, response, body) => {
+        let _body = {};
+        try {
+          _body = JSON.parse(body);
+        } catch (e) {
+          _body = {};
+        }
+        expect(response.statusCode).to.equal(404);
       },
     );
     done();
