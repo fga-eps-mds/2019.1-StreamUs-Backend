@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
   if (user) {
     const saveRoom = await graph.vertexCollection('Room').save({ name: roomName, permissions });
     await graph.edgeCollection('users_room').save({ type: 'owner' }, user._id, saveRoom._id);
-    res.status(200).send(saveRoom);
+    res.status(201).send(saveRoom);
   }
   res.status(404);
 });
