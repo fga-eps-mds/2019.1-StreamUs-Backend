@@ -40,11 +40,11 @@ router.post('/adduser/:userKey/:roomKey/:newUserKey', async (req, res) => {
   const newUser = await db.collection('User').document(newUserKey);
   const room = await db.collection('Room').document(roomKey);
   if (user && newUser && room) {
-      const userOwner = await db.collection('users_room').document(user._id, room._id);
-      if(userOwner.type == 'owner'){
-          await graph.edgeCollection('users_room').save({ type: 'default' }, newUser._id, room._id);
-          res.status(200)
-      }
+    const userOwner = await db.collection('users_room').document(user._id, room._id);
+    if (userOwner.type === 'owner') {
+      await graph.edgeCollection('users_room').save({ type: 'default' }, newUser._id, room._id);
+      res.status(200);
+    }
   }
   res.status(404);
 });
