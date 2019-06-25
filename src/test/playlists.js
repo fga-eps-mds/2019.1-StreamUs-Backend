@@ -9,7 +9,7 @@ const db = new Database({ url: process.env.ARANGO_HOST });
 db.useBasicAuth('root', process.env.ARANGO_ROOT_PASSWORD);
 db.useDatabase(process.env.ARANGO_DATABASE);
 const graph = db.graph('streamUs');
-const urlBase = 'http://localhost:3000/api/v1/user';
+const urlBase = 'https://api.streamusmusic.app/api/v1/user';
 let userId;
 describe('Testing /routes/playlists', () => {
   before(async () => {
